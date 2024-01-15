@@ -14,7 +14,7 @@
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <Version>1.0.1</Version>
     <PackageVersion>1.0.1</PackageVersion>
-    <PackageTags></PackageTags>
+    <PackageTags>fluentassertions;fluent-assertions;unit-testing;tests;rebus;service-bus;fluent;assertions;unit;testing</PackageTags>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageDescription>Description here</PackageDescription>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
