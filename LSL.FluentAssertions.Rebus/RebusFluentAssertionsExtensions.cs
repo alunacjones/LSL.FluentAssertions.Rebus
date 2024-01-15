@@ -1,5 +1,4 @@
 using Rebus.TestHelpers;
-using Rebus.TestHelpers.Events;
 
 namespace LSL.FluentAssertions.Rebus
 {
@@ -13,6 +12,6 @@ namespace LSL.FluentAssertions.Rebus
         /// </summary>
         /// <param name="instance"></param>
         /// <returns></returns>
-        public static RebusFakeBusAssertions<FakeBusEvent> Should(this FakeBus instance) => new RebusFakeBusAssertions<FakeBusEvent>(instance.Events);
+        public static RebusFakeBusAssertions Should(this FakeBus instance) => new RebusFakeBusAssertions(instance);
     }
 }

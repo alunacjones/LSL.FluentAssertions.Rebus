@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using FluentAssertions;
-using FluentAssertions.Collections;
 using FluentAssertions.Execution;
-using LSL.FluentAssertions.Rebus;
+using FluentAssertions.Primitives;
 using Rebus.TestHelpers;
 using Rebus.TestHelpers.Events;
 
@@ -14,13 +11,12 @@ namespace LSL.FluentAssertions.Rebus
     /// <summary>
     /// RebusFakeBusAssertions
     /// </summary>
-    public class RebusFakeBusAssertions<TEvent> : GenericCollectionAssertions<IEnumerable<TEvent>, TEvent, RebusFakeBusAssertions<TEvent>>
-        where TEvent : FakeBusEvent
+    public class RebusFakeBusAssertions : ReferenceTypeAssertions<FakeBus, RebusFakeBusAssertions>
     {
-        internal RebusFakeBusAssertions(IEnumerable<TEvent> instance) : base(instance) { }
+        internal RebusFakeBusAssertions(FakeBus instance) : base(instance) { }
 
         /// <inheritdoc/>
-        protected override string Identifier => nameof(RebusFakeBusAssertions<TEvent>);
+        protected override string Identifier => nameof(RebusFakeBusAssertions);
 
         /// <summary>
         /// Asserts the number of messages on the FakeBus instance
@@ -29,9 +25,9 @@ namespace LSL.FluentAssertions.Rebus
         /// <param name="because"></param>
         /// <param name="becauseArgs"></param>
         /// <returns></returns>
-        public AndConstraint<RebusFakeBusAssertions<TEvent>> HaveMessageCount(int expectedMessageCount, string because = "", params object[] becauseArgs) 
+        public AndConstraint<RebusFakeBusAssertions> HaveMessageCount(int expectedMessageCount, string because = "", params object[] becauseArgs) 
         {
-            var messageCount = Subject.Count();
+            var messageCount = Subject.Events.Count();
 
             return Fluently(() => Execute.Assertion
                 .BecauseOf(because, becauseArgs)
@@ -46,9 +42,9 @@ namespace LSL.FluentAssertions.Rebus
         /// <param name="because"></param>
         /// <param name="becauseArgs"></param>
         /// <returns></returns>
-        public AndConstraint<RebusFakeBusAssertions<TEvent>> BeEmpty(string because = "", params object[] becauseArgs)
+        public AndConstraint<RebusFakeBusAssertions> BeEmpty(string because = "", params object[] becauseArgs)
         {
-            var messageCount = Subject.Count();
+            var messageCount = Subject.Events.Count();
 
             return Fluently(() => Execute.Assertion
                 .BecauseOf(because, becauseArgs)
@@ -58,66 +54,96 @@ namespace LSL.FluentAssertions.Rebus
         }
 
         /// <summary>
-        /// Returns the collection assertion object for MessageSent<typeparamref name="TMessage"/> events on the bus
+        /// Returns the collection assertion object for MessageDeferred&lt;<typeparamref name="TMessage"/>&gt; events on the bus
         /// </summary>
         /// <typeparam name="TMessage"></typeparam>
         /// <returns></returns>
-        public AndConstraint<RebusFakeBusAssertions<MessageSent<TMessage>>> HaveSentMessages<TMessage>() =>
-            ReturnForTransportMessages<MessageSent<TMessage>>();
+        public AndConstraint<PerMessageTypeAssertions<MessageDeferred<TMessage>>> HaveDeferredMessages<TMessage>() =>
+            ReturnForTransportMessages<MessageDeferred<TMessage>>();
+
+        /// <summary>
+        /// Returns the collection assertion object for HaveDeferredToDesinationMessages&lt;<typeparamref name="TMessage"/>&gt; events on the bus
+        /// </summary>
+        /// <typeparam name="TMessage"></typeparam>
+        /// <returns></returns>
+        public AndConstraint<PerMessageTypeAssertions<MessageDeferredToDestination<TMessage>>> HaveDeferredToDesinationMessages<TMessage>() =>
+            ReturnForTransportMessages<MessageDeferredToDestination<TMessage>>();
+
+        /// <summary>
+        /// Returns the collection assertion object for HaveDeferredToSelfMessages&lt;<typeparamref name="TMessage"/>&gt; events on the bus
+        /// </summary>
+        /// <typeparam name="TMessage"></typeparam>
+        /// <returns></returns>
+        public AndConstraint<PerMessageTypeAssertions<MessageDeferredToSelf<TMessage>>> HaveDeferredToSelfMessages<TMessage>() =>
+            ReturnForTransportMessages<MessageDeferredToSelf<TMessage>>();
+
+        /// <summary>
+        /// Returns the collection assertion object for HavePublishedMessages&lt;<typeparamref name="TMessage"/>&gt; events on the bus
+        /// </summary>
+        /// <typeparam name="TMessage"></typeparam>
+        /// <returns></returns>
+        public AndConstraint<PerMessageTypeAssertions<MessagePublished<TMessage>>> HavePublishedMessages<TMessage>() =>
+            ReturnForTransportMessages<MessagePublished<TMessage>>();
 
         /// <summary>
         /// Returns the collection assertion object for MessagePublishedToTopic&lt;<typeparamref name="TMessage"/>&gt; events on the bus
         /// </summary>
         /// <typeparam name="TMessage"></typeparam>
         /// <returns></returns>
-        public AndConstraint<RebusFakeBusAssertions<MessagePublishedToTopic<TMessage>>> HavePublishedToTopicMessages<TMessage>() =>
+        public AndConstraint<PerMessageTypeAssertions<MessagePublishedToTopic<TMessage>>> HavePublishedToTopicMessages<TMessage>() =>
             ReturnForTransportMessages<MessagePublishedToTopic<TMessage>>();
 
         /// <summary>
-        /// Returns the collection assertion object for MessageDeferred<typeparamref name="TMessage"/> events on the bus
+        /// Returns the collection assertion object for MessageSent&lt;<typeparamref name="TMessage"/>&gt; events on the bus
         /// </summary>
         /// <typeparam name="TMessage"></typeparam>
         /// <returns></returns>
-        public AndConstraint<RebusFakeBusAssertions<MessageDeferred<TMessage>>> HaveDeferredMessages<TMessage>() =>
-            ReturnForTransportMessages<MessageDeferred<TMessage>>();
+        public AndConstraint<PerMessageTypeAssertions<MessageSent<TMessage>>> HaveSentMessages<TMessage>() =>
+            ReturnForTransportMessages<MessageSent<TMessage>>();
 
-        public AndConstraint<RebusFakeBusAssertions<MessageDeferredToDestination<TMessage>>> HaveDeferredToDesinationMessages<TMessage>() =>
-            ReturnForTransportMessages<MessageDeferredToDestination<TMessage>>();
-
-        public AndConstraint<RebusFakeBusAssertions<MessageDeferredToSelf<TMessage>>> HaveDeferredToSelfMessages<TMessage>() =>
-            ReturnForTransportMessages<MessageDeferredToSelf<TMessage>>();
-
-        public AndConstraint<RebusFakeBusAssertions<MessagePublished<TMessage>>> HavePublishedMessages<TMessage>() =>
-            ReturnForTransportMessages<MessagePublished<TMessage>>();
-
-        public AndConstraint<RebusFakeBusAssertions<MessageSentToDestination<TMessage>>> HaveSentToDestinationMessages<TMessage>() =>
+        /// <summary>
+        /// Returns the collection assertion object for HaveSentToDestinationMessages&lt;<typeparamref name="TMessage"/>&gt; events on the bus
+        /// </summary>
+        /// <typeparam name="TMessage"></typeparam>
+        /// <returns></returns>
+        public AndConstraint<PerMessageTypeAssertions<MessageSentToDestination<TMessage>>> HaveSentToDestinationMessages<TMessage>() =>
             ReturnForTransportMessages<MessageSentToDestination<TMessage>>();
 
-        public AndConstraint<RebusFakeBusAssertions<MessageSentToSelf<TMessage>>> HaveSentToSelfMessages<TMessage>() =>
+        /// <summary>
+        /// Returns the collection assertion object for HaveSentToSelfMessages&lt;<typeparamref name="TMessage"/>&gt; events on the bus
+        /// </summary>
+        /// <typeparam name="TMessage"></typeparam>
+        /// <returns></returns>
+        public AndConstraint<PerMessageTypeAssertions<MessageSentToSelf<TMessage>>> HaveSentToSelfMessages<TMessage>() =>
             ReturnForTransportMessages<MessageSentToSelf<TMessage>>();
 
-        public AndConstraint<RebusFakeBusAssertions<MessageSentWithRoutingSlip<TMessage>>> HaveSentWithRoutingSlipMessages<TMessage>() =>
+        /// <summary>
+        /// Returns the collection assertion object for HaveSentWithRoutingSlipMessages&lt;<typeparamref name="TMessage"/>&gt; events on the bus
+        /// </summary>
+        /// <typeparam name="TMessage"></typeparam>
+        /// <returns></returns>
+        public AndConstraint<PerMessageTypeAssertions<MessageSentWithRoutingSlip<TMessage>>> HaveSentWithRoutingSlipMessages<TMessage>() =>
             ReturnForTransportMessages<MessageSentWithRoutingSlip<TMessage>>();
 
-        private AndConstraint<RebusFakeBusAssertions<TTransportMessage>> ReturnForTransportMessages<TTransportMessage>()
+        private AndConstraint<PerMessageTypeAssertions<TTransportMessage>> ReturnForTransportMessages<TTransportMessage>()
             where TTransportMessage : FakeBusEvent
         {
-            var messages = Subject.OfType<TTransportMessage>();
+            var messages = Subject.Events.OfType<TTransportMessage>();
 
             Execute.Assertion
                 .BecauseOf("")
                 .ForCondition(messages.Any())
                 .FailWith("The bus contains no messages of type {0}", GetFriendlyTypeName(typeof(TTransportMessage)));
 
-            return new AndConstraint<RebusFakeBusAssertions<TTransportMessage>>(new RebusFakeBusAssertions<TTransportMessage>(
+            return new AndConstraint<PerMessageTypeAssertions<TTransportMessage>>(new PerMessageTypeAssertions<TTransportMessage>(
                 messages
             ));
         }
 
-        private AndConstraint<RebusFakeBusAssertions<TEvent>> Fluently(Action assertions)
+        private AndConstraint<RebusFakeBusAssertions> Fluently(Action assertions)
         {
             assertions();
-            return new AndConstraint<RebusFakeBusAssertions<TEvent>>(this);
+            return new AndConstraint<RebusFakeBusAssertions>(this);
         }
 
         private string GetFriendlyTypeName(Type type)
@@ -130,6 +156,5 @@ namespace LSL.FluentAssertions.Rebus
 
             return type.Name;
         }
-
     }
 }
