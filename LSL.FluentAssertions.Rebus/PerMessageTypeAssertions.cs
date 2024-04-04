@@ -16,3 +16,8 @@ public class PerMessageTypeAssertions<TEvent> : GenericCollectionAssertions<IEnu
     {
     }
 }
+
+internal class Other
+{
+    
+}
